@@ -21,8 +21,18 @@ public class CompanyController {
         return service.getCompanies();
     }
 
+    @GetMapping("/{id}")
+    public CompanyCreateOrUpdateDto getCompanyForUpdate(@PathVariable Long id){
+        return service.getCompanyForUpdate(id);
+    }
+
+    @PutMapping
+    public Long updateCompany(@RequestBody CompanyCreateOrUpdateDto company){
+        return service.updateCompany(company);
+    }
+
     @PostMapping
-     Long addCompany(@RequestBody CompanyCreateOrUpdateDto company ) {
+     public Long addCompany(@RequestBody CompanyCreateOrUpdateDto company ) {
         return service.addCompany(company);
     }
 

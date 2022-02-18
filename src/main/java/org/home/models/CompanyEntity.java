@@ -22,7 +22,7 @@ public class CompanyEntity {
     @JoinColumn (name="sector_id")
     private SectorEntity sector;
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval = true)
     private Set<CompanyAnalystEntity> companyAnalysts = new HashSet<>();
 
 }

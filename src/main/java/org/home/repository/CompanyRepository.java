@@ -13,6 +13,4 @@ public interface CompanyRepository extends CrudRepository<CompanyEntity, Long>{
 
     void deleteById(Long id);
 
-
-
 }

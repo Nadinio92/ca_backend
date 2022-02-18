@@ -13,10 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Service
+@Transactional
 @RequiredArgsConstructor // Creates constructor with required ('final') parameters and set fields values
 public class CompanyServiceImpl implements CompanyService {
 
@@ -25,7 +28,6 @@ public class CompanyServiceImpl implements CompanyService {
     private final SectorRepository sectorRepository;
     private final CompanyAnalystRepository companyAnalystRepository;
 
-    @Transactional
     @Override
     public Long addCompany(CompanyCreateOrUpdateDto dto) {
 
@@ -61,13 +63,13 @@ public class CompanyServiceImpl implements CompanyService {
         return savedCompanyEntity.getId();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<CompanyDto> getCompanies() {
 
         var companyDtoList = new ArrayList<CompanyDto>();
 
-        for(CompanyEntity companyEntity : companyRepository.findAll()) { // N+1 problem
+        for(CompanyEntity companyEntity : companyRepository.findAll()) { // TODO: N+1 problem
             var companyDto = new CompanyDto();
             companyDto.setId(companyEntity.getId());
             companyDto.setName(companyEntity.getName());
@@ -89,11 +91,65 @@ public class CompanyServiceImpl implements CompanyService {
         return companyDtoList;
     }
 
-    @Transactional
     @Override
     public boolean delete(Long id) {
         companyAnalystRepository.deleteCompanyAnalystEntityByCompanyId(id);
         companyRepository.deleteById(id);
         return true;
     }
+
+    @Override
+    public CompanyCreateOrUpdateDto getCompanyForUpdate(Long id) {
+        var companyDto = new CompanyCreateOrUpdateDto();
+        var companyEntity = companyRepository.findById(id).orElseThrow();
+        companyDto.setId(companyEntity.getId());
+        companyDto.setMarketCap(companyEntity.getMarketCap());
+        companyDto.setName(companyEntity.getName());
+        companyDto.setSector(companyEntity.getSector().getId());
+
+        List<Long> analystLists = new ArrayList<>();
+        for(CompanyAnalystEntity companyAnalystEntity : companyEntity.getCompanyAnalysts()){
+            Long analystId = companyAnalystEntity.getAnalyst().getId();
+            analystLists.add(analystId);
+        }
+        companyDto.setAnalysts(analystLists);
+
+        return companyDto;
+    }
+
+    @Override
+    public Long updateCompany(CompanyCreateOrUpdateDto dto) {
+
+        CompanyEntity companyEntity = companyRepository.findById(dto.getId()).orElseThrow();
+        companyEntity.setName(dto.getName());
+        companyEntity.setMarketCap(dto.getMarketCap());
+        var sectorEntity = new SectorEntity();
+        sectorEntity.setId(dto.getSector());
+        companyEntity.setSector(sectorEntity);
+
+        Set<CompanyAnalystEntity> companyAnalysts = new HashSet<>();
+
+        for(Long analystId : dto.getAnalysts()) {
+            CompanyAnalystEntity companyAnalystEntity = new CompanyAnalystEntity();
+            CompanyAnalystId companyAnalystId = new CompanyAnalystId();
+            companyAnalystId.setCompanyId(dto.getId());
+            companyAnalystId.setAnalystId(analystId);
+            companyAnalystEntity.setId(companyAnalystId);
+
+            companyAnalystEntity.setCompany(companyEntity);
+
+            var analyst = new AnalystEntity();
+            analyst.setId(analystId);
+            companyAnalystEntity.setAnalyst(analyst);
+
+            companyAnalysts.add(companyAnalystEntity);
+        }
+        companyEntity.getCompanyAnalysts().clear();
+        companyEntity.getCompanyAnalysts().addAll(companyAnalysts);
+        companyRepository.save(companyEntity);
+
+        return dto.getId();
+    }
+
+
 }

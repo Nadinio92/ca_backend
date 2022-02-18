@@ -13,5 +13,9 @@ public interface CompanyService {
     List<CompanyDto> getCompanies();
 
     boolean delete (Long id);
+
+    CompanyCreateOrUpdateDto getCompanyForUpdate(Long id);
+
+    Long updateCompany(CompanyCreateOrUpdateDto company);
 }
 
