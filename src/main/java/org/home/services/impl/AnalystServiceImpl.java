@@ -5,6 +5,7 @@ import org.home.dto.AnalystCreateOrUpdateDto;
 import org.home.dto.AnalystDto;
 import org.home.models.AnalystEntity;
 import org.home.models.CompanyAnalystEntity;
+import org.home.models.CompanyAnalystId;
 import org.home.repository.AnalystRepository;
 import org.home.repository.CompanyAnalystRepository;
 import org.home.repository.CompanyRepository;
@@ -14,10 +15,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class AnalystServiceImpl implements AnalystService {
 
     private final AnalystRepository analystRepository;
@@ -26,7 +30,7 @@ public class AnalystServiceImpl implements AnalystService {
     private final CompanyAnalystRepository companyAnalystRepository;
 
 
-    @Transactional
+
     @Override
     public Long addAnalyst(AnalystCreateOrUpdateDto dto) {
         AnalystEntity analystEntity = new AnalystEntity();
@@ -62,4 +66,54 @@ public class AnalystServiceImpl implements AnalystService {
         }
         return analystDtoList;
     }
+
+  @Override
+  public boolean delete(Long id) {
+    companyAnalystRepository.deleteCompanyAnalystEntityByAnalystId(id);
+    analystRepository.deleteById(id);
+    return true;
+  }
+
+  @Override
+  public Long updateAnalyst(AnalystCreateOrUpdateDto dto) {
+    AnalystEntity analystEntity = analystRepository.findById(dto.getId()).orElseThrow();
+    analystEntity.setName(dto.getName());
+
+    Set<CompanyAnalystEntity> companyAnalysts = new HashSet<>();
+
+    for (Long companyId : dto.getCompanies()) {
+      CompanyAnalystEntity companyAnalystEntity = new CompanyAnalystEntity();
+      CompanyAnalystId companyAnalystId = new CompanyAnalystId();
+      companyAnalystId.setCompanyId(companyId);
+      companyAnalystId.setAnalystId(dto.getId());
+      companyAnalystEntity.setId(companyAnalystId);
+
+      companyAnalystEntity.setAnalyst(analystEntity);
+
+    }
+
+    analystEntity.getCompanyAnalysts().clear();
+    analystEntity.getCompanyAnalysts().addAll(companyAnalysts);
+    analystRepository.save(analystEntity);
+    return dto.getId();
+  }
+
+  @Override
+  public AnalystCreateOrUpdateDto getAnalystForUpdate(Long id) {
+    var analystDto = new AnalystCreateOrUpdateDto();
+    var analystEntity = analystRepository.findById(id).orElseThrow();
+    analystDto.setId(analystEntity.getId());
+    analystDto.setName(analystEntity.getName());
+
+    List<Long> companyList = new ArrayList<>();
+    for(CompanyAnalystEntity companyAnalystEntity : analystEntity.getCompanyAnalysts()){
+      Long companyId = companyAnalystEntity.getCompany().getId();
+      companyList.add(companyId);
+    }
+
+    analystDto.setCompanies(companyList);
+
+    return analystDto;
+  }
+
 }
