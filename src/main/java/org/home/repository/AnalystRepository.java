@@ -11,6 +11,8 @@ public interface AnalystRepository extends CrudRepository<AnalystEntity,Long> {
 
     List<AnalystEntity> findAnalystEntityByIdIn(List<Long> id);
 
+    void deleteById(Long id);
+
 
 
 }

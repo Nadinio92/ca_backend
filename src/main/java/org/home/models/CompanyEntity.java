@@ -12,6 +12,7 @@ import java.util.Set;
 @Table(name = "company")
 public class CompanyEntity {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -25,4 +26,6 @@ public class CompanyEntity {
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval = true)
     private Set<CompanyAnalystEntity> companyAnalysts = new HashSet<>();
 
+  public CompanyEntity() {
+  }
 }

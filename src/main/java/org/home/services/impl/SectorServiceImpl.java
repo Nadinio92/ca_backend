@@ -16,6 +16,19 @@ public class SectorServiceImpl implements SectorService {
 
     private final SectorRepository sectorRepository;
 
+/*
+    private void register(String contact) {
+      if (!repository.contains(contact)) {
+        repository.insert(contact);
+      }
+    }
+
+    private test() {
+      when(repository.contains(contact)).thenReutrn(false);
+      service.register(contact);
+      verify(repository).insert(contact);
+    }*/
+
     @Override
     public List<SectorDto> getSectors() {
 

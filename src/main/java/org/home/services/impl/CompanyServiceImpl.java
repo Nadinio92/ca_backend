@@ -3,11 +3,10 @@ package org.home.services.impl;
 import lombok.RequiredArgsConstructor;
 import org.home.dto.CompanyCreateOrUpdateDto;
 import org.home.dto.CompanyDto;
+import org.home.exception.CompanyAnalystException;
 import org.home.models.*;
-import org.home.repository.AnalystRepository;
 import org.home.repository.CompanyAnalystRepository;
 import org.home.repository.CompanyRepository;
-import org.home.repository.SectorRepository;
 import org.home.services.CompanyService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +23,6 @@ import java.util.Set;
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository companyRepository;
-    private final AnalystRepository analystRepository;
-    private final SectorRepository sectorRepository;
     private final CompanyAnalystRepository companyAnalystRepository;
 
     @Override
@@ -63,32 +60,36 @@ public class CompanyServiceImpl implements CompanyService {
         return savedCompanyEntity.getId();
     }
 
+
+
     @Transactional(readOnly = true)
     @Override
-    public List<CompanyDto> getCompanies() {
+    public List<CompanyDto> getCompanies() throws CompanyAnalystException {
+      var companyDtoList = new ArrayList<CompanyDto>();
 
-        var companyDtoList = new ArrayList<CompanyDto>();
+      for(CompanyEntity companyEntity : companyRepository.findAll()) {
+          var companyDto = new CompanyDto();
+//          if (companyEntity.getId() == 2) {
+//            throw new CompanyAnalystException("You have no access to company with id=" + companyEntity.getId());
+//          }
+          companyDto.setId(companyEntity.getId());
+          companyDto.setName(companyEntity.getName());
+          companyDto.setMarketCap(companyEntity.getMarketCap());
+          if(companyEntity.getSector() != null) {
+              companyDto.setSector(companyEntity.getSector().getName());
+          }
 
-        for(CompanyEntity companyEntity : companyRepository.findAll()) { // TODO: N+1 problem
-            var companyDto = new CompanyDto();
-            companyDto.setId(companyEntity.getId());
-            companyDto.setName(companyEntity.getName());
-            companyDto.setMarketCap(companyEntity.getMarketCap());
-            if(companyEntity.getSector() != null) {
-                companyDto.setSector(companyEntity.getSector().getName());
-            }
+          List<String> analystLists = new ArrayList<>();
 
-            List<String> analystLists = new ArrayList<>();
+          for(CompanyAnalystEntity companyAnalystEntity : companyEntity.getCompanyAnalysts()){
+              String analystName = companyAnalystEntity.getAnalyst().getName();
+              analystLists.add(analystName);
+          }
+          companyDto.setAnalysts(analystLists);
 
-            for(CompanyAnalystEntity companyAnalystEntity : companyEntity.getCompanyAnalysts()){
-                String analystName = companyAnalystEntity.getAnalyst().getName();
-                analystLists.add(analystName);
-            }
-            companyDto.setAnalysts(analystLists);
-
-            companyDtoList.add(companyDto);
-        }
-        return companyDtoList;
+          companyDtoList.add(companyDto);
+      }
+      return companyDtoList;
     }
 
     @Override

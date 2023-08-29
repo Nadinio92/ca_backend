@@ -15,6 +15,10 @@ public interface CompanyAnalystRepository extends CrudRepository<CompanyAnalystE
     @Query ("delete from CompanyAnalystEntity c where c.id.companyId = :id" )
     void deleteCompanyAnalystEntityByCompanyId(Long id);
 
+  @Modifying
+  @Query ("delete from CompanyAnalystEntity c where c.id.analystId = :id" )
+  void deleteCompanyAnalystEntityByAnalystId(Long id);
+
 
     @Modifying
     @Query(nativeQuery = true, value = "INSERT INTO COMPANY_ANALYST(COMPANY_ID, ANALYST_ID) VALUES (:companyId, :analystId)")

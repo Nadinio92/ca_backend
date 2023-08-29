@@ -26,4 +26,22 @@ public class AnalystController {
     Long addAnalyst(@RequestBody AnalystCreateOrUpdateDto analyst) {
         return service.addAnalyst(analyst);
     }
+
+    @DeleteMapping("/{id}")
+    boolean deleteAnalyst(@PathVariable Long id) {
+    return service.delete(id);
+  }
+
+    @PutMapping
+    public Long updateAnalyst(@RequestBody AnalystCreateOrUpdateDto analyst){
+    return service.updateAnalyst(analyst);
+  }
+
+    @GetMapping("/{id}")
+    public AnalystCreateOrUpdateDto getAnalystForUpdate(@PathVariable Long id){
+    return service.getAnalystForUpdate(id);
+  }
+
+
+
 }
