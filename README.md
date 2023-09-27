@@ -1,6 +1,6 @@
 # Financial Application Backend Service README
 Welcome to the repository for the backend development of our Financial Application! 
-This project focuses on building a robust backend service that empowers Research Directors to efficiently assign analysts to companies and manage the assoc datiateda.
+This project focuses on building a robust backend service that empowers Research Directors to efficiently assign analysts to companies and manage the associated data.
 The backend service is developed from scratch using Spring Boot, encompassing various layers such as REST Controllers, Services, DAO/Repositories, and Entity/Persistence. 
 The application leverages Spring Data JPA (Hibernate Framework) for seamless Object-Relational Mapping (ORM) and integrates an H2 database for data storage. 
 To ensure reliability, the project also employs testing using Mockito.
